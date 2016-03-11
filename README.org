@@ -1,0 +1,4 @@
+** 11 Mar 2016
+
+- [[file:hla.R]] Extract feature matrix of HLA allele counts and model
+  probabilities from test.RData.
