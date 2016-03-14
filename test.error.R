@@ -19,6 +19,9 @@ for(test.fold in 1:n.folds){
     major.class=trivial[[test.fold]]
     )
   glmnet.by.weight <- glmnet.list[[test.fold]]
+  if(is.null(names(glmnet.by.weight))){
+    names(glmnet.by.weight) <- c("one", "balanced")
+  }
   for(weight.name in names(glmnet.by.weight)){
     model <- paste0("glmnet.", weight.name)
     prediction.list[[model]] <- glmnet.by.weight[[weight.name]]$probability

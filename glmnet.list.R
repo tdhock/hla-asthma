@@ -16,7 +16,7 @@ for(test.fold in 1:n.folds){
     one=rep(1, nrow(train.features)),
     balanced=1/label.counts[paste(train.labels$status)])
   sapply(weight.list, sum)
-  glmnet.list[[test.fold]] <- foreach(weight.name=names(weight.list)) %dopar% {
+  result.list <- foreach(weight.name=names(weight.list)) %dopar% {
     cat(sprintf("%4d / %4d folds weights=%s\n",
                 test.fold, n.folds, weight.name))
     weight.vec <- weight.list[[weight.name]]
@@ -29,6 +29,8 @@ for(test.fold in 1:n.folds){
     list(probability=prob.vec,
          fit=fit)
   }
+  names(result.list) <- names(weight.list)
+  glmnet.list[[test.fold]] <- result.list
 }
 
 save(glmnet.list, file="glmnet.list.RData")

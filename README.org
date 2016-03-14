@@ -2,8 +2,14 @@
 
 - nonlinear models like SVM, KNN, ctree, cforest.
 - augmented feature space (age, SNPs)
+- unscaled model so we can interpret weights.
 
 ** 14 Mar 2016
+
+[[file:figure-glmnet.R]] produces a plot of variable importance in terms
+of number of folds for which each variable was selected in 10-fold CV.
+
+[[file:figure-glmnet.png]]
 
 [[file:figure-test-error.R]] produces two plots:
 
