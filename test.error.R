@@ -21,7 +21,7 @@ for(test.fold in 1:n.folds){
   glmnet.by.weight <- glmnet.list[[test.fold]]
   for(weight.name in names(glmnet.by.weight)){
     model <- paste0("glmnet.", weight.name)
-    prediction.list[[model]] <- glmnet.by.weight[[weight.name]]
+    prediction.list[[model]] <- glmnet.by.weight[[weight.name]]$probability
   }
   for(model in names(prediction.list)){
     prob.asthma <- as.numeric(prediction.list[[model]])

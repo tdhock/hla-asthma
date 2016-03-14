@@ -1,4 +1,25 @@
+** TODOs
+
+- nonlinear models like SVM, KNN, ctree, cforest.
+- augmented feature space (age, SNPs)
+
+** 14 Mar 2016
+
+[[file:figure-test-error.R]] produces two plots:
+
+Facetted roc curves (one for each test fold) suggest that
+glmnet.balanced model (not glmnet.one) is better than random guessing.
+
+[[file:figure-test-error-roc.png]]
+
+The error metrics below show that the glmnet.balanced model is
+definitely learning a weak pattern that can predict asthma/healthy
+status better than random guessing (which is what major.class and
+glmnet.one do).
+
+[[file:figure-test-error.png]]
+
 ** 11 Mar 2016
 
-- [[file:hla.R]] Extract feature matrix of HLA allele counts and model
-  probabilities from test.RData.
+[[file:hla.R]] Extract feature matrix of HLA allele counts and model
+probabilities from test.RData.
