@@ -1,3 +1,5 @@
+figure-glmnet.png: figure-glmnet.R glmnet.list.RData
+	R --no-save < $<
 figure-test-error.png: figure-test-error.R test.error.RData
 	R --no-save < $<
 test.error.RData: test.error.R trivial.RData glmnet.list.RData 

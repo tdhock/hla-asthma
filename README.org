@@ -1,11 +1,20 @@
 ** TODOs
 
+- clinical data for other 14 diseases. setup cross-validation
+  experiment with folds that contain 10% of each disease?
+- multi-task learning code? Is it more or less accurate than the
+  disease-specific single-task learning model? Are the sets of
+  selected genes different?
 - survival prediction (coxnet or AFT?)
 - nonlinear models like SVM, KNN, ctree, cforest.
 - augmented feature space (age, SNPs)
 - unscaled model so we can interpret weights.
 
 ** 18 Mar 2016
+
+Meeting with Steve, explained L1-regularized logistic regression
+model. QUESTION: what is the common mechanism of the 15 different
+diseases?
 
 [[file:figure-glmnet.R]] produces a plot which shows glmnet model
 selection curves: binomial deviance on the validation set, and AUC on
