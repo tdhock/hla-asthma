@@ -65,3 +65,7 @@ png("figure-test-error.png", w=800)
 print(gg.error)
 dev.off()
 
+pdf("figure-test-error.pdf", h=3, w=10)
+print(gg.error)
+dev.off()
+

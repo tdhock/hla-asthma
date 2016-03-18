@@ -159,6 +159,10 @@ gg.dots <- ggplot()+
   geom_point(aes(weight, variable.importance, color=gene),
              shape=1,
              data=show.points)
-png("figure-glmnet.png")
+png("figure-glmnet.png", h=600)
+print(gg.dots)
+dev.off()
+
+pdf("figure-glmnet.pdf", h=9)
 print(gg.dots)
 dev.off()
