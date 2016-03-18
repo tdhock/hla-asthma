@@ -2,13 +2,15 @@ figure-glmnet.png: figure-glmnet.R glmnet.list.RData
 	R --no-save < $<
 figure-test-error.png: figure-test-error.R test.error.RData
 	R --no-save < $<
-test.error.RData: test.error.R trivial.RData glmnet.list.RData 
-	R --no-save < $<
-trivial.RData: trivial.R fold.RData 
-	R --no-save < $<
-glmnet.list.RData: glmnet.list.R fold.RData
+test.error.RData: test.error.R input.features.RData output.diseases.RData models.RData
 	R --no-save < $<
 fold.RData: fold.R hla.RData
+	R --no-save < $<
+models.RData: models.R
+	R --no-save < $<
+input.features.RData: input.features.R hla.RData
+	R --no-save < $<
+output.diseases.RData: output.diseases.R hla.RData
 	R --no-save < $<
 hla.RData: hla.R
 	R --no-save < $<

@@ -12,8 +12,8 @@ asthma.pattern <- paste0(
 
 e <- new.env()
 load("test.RData", e)
-asthma.obj.mat <- str_match_named(ls(e), asthma.pattern)
-not.na.mat <- asthma.obj.mat[!is.na(asthma.obj.mat[,1]),]
+(asthma.obj.mat <- str_match_named(ls(e), asthma.pattern))
+(not.na.mat <- asthma.obj.mat[!is.na(asthma.obj.mat[,1]),])
 stopifnot(nrow(not.na.mat) == 14)
 obj.name <- rownames(not.na.mat)[[1]]
 id.vec <- e[[obj.name]]$ID
@@ -46,7 +46,7 @@ for(obj.name in rownames(not.na.mat)){
 }
 
 clinical <- gene.dt[, .(ID, Aff, Age)]
-clinical[, status := factor(Aff, 1:2, c("healthy", "asthma"))]
+clinical[, status := factor(Aff, 1:2, c("healthy", "diseased"))]
 table(clinical$Aff)
 
 hla <- list(

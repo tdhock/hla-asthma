@@ -2,49 +2,55 @@ works_with_R("3.2.3",
              "tdhock/WeightedROC@3452d61638e16f547f73c1a0f3bf852a3751f29d")
 
 load("fold.RData")
-load("hla.RData")
-load("trivial.RData")
-objs <- load("glmnet.list.RData")
+load("input.features.RData")
+load("output.diseases.RData")
+load("models.RData")
+
+model.grid <- 
+  expand.grid(
+    test.fold=1:n.folds,
+    input.name=names(input.features),
+    output.name=names(output.diseases),
+    model.name=names(models))
 
 error.list <- list()
 roc.list <- list()
-for(test.fold in 1:n.folds){
-  is.test <- fold == test.fold
-  test.labels <- hla$clinical[is.test, ]
-  label.counts <- table(test.labels$status)
+for(model.i in 1:nrow(model.grid)){
+  model.info <- model.grid[model.i, ]
+  arg.vec <- sapply(model.info, paste)
+  out.file <- paste0(paste(c("models", arg.vec), collapse="/"), ".RData")
+  if(!file.exists(out.file)){
+    cmd <- paste(c("Rscript one.model.R", arg.vec), collapse=" ")
+    system(cmd)
+  }
+  load(out.file)
+  prob.diseased <- as.numeric(result.list$probability)
+  pred.label <- ifelse(0.5 < prob.diseased, "diseased", "healthy")
+  is.test <- model.info$test.fold == fold
+  all.input.mat <- input.features[[paste(model.info$input.name)]]
+  all.output.vec <- output.diseases[[paste(model.info$output.name)]]
+  test.output.vec <- all.output.vec[is.test]
+  is.error <- pred.label != test.output.vec
+  test.label <- ifelse(test.output.vec=="diseased", 1, -1)
+  label.counts <- table(test.output.vec)
   weight.list <- list(
-    one=rep(1, nrow(test.labels)),
-    balanced=1/label.counts[paste(test.labels$status)])
-  prediction.list <- list(
-    major.class=trivial[[test.fold]]
-    )
-  glmnet.by.weight <- glmnet.list[[test.fold]]
-  if(is.null(names(glmnet.by.weight))){
-    names(glmnet.by.weight) <- c("one", "balanced")
-  }
-  for(weight.name in names(glmnet.by.weight)){
-    model <- paste0("glmnet.", weight.name)
-    prediction.list[[model]] <- glmnet.by.weight[[weight.name]]$probability
-  }
-  for(model in names(prediction.list)){
-    prob.asthma <- as.numeric(prediction.list[[model]])
-    pred.label <- ifelse(0.5 < prob.asthma, "asthma", "healthy")
-    is.error <- pred.label != test.labels$status
-    test.label <- ifelse(test.labels$status=="asthma", 1, -1)
-    for(test.weights in names(weight.list)){
-      weight.vec <- weight.list[[test.weights]]
-      roc <- WeightedROC(prob.asthma, test.label, weight.vec)
-      auc <- WeightedAUC(roc)
-      total.weight <- sum(weight.vec)
-      weighted.error <- sum(is.error * weight.vec)
-      error.list[[paste(test.fold, model, test.weights)]] <- 
-        data.frame(test.fold, model, test.weights,
-                   auc, total.weight, weighted.error)
-      roc.list[[paste(test.fold, model, test.weights)]] <-
-        data.frame(test.fold, model, test.weights, roc)
-    }#for(test.weights
-  }#for(model
-}#for(test.fold
+    one=rep(1, length(test.output.vec)),
+    balanced=1/label.counts[paste(test.output.vec)])
+  for(test.weights in names(weight.list)){
+    weight.vec <- weight.list[[test.weights]]
+    roc <- WeightedROC(prob.diseased, test.label, weight.vec)
+    auc <- WeightedAUC(roc)
+    total.weight <- sum(weight.vec)
+    weighted.error <- sum(is.error * weight.vec)
+    error.list[[paste(model.i, test.weights)]] <- 
+      data.frame(model.info, test.weights,
+                 auc, total.weight, weighted.error,
+                 row.names=NULL)
+    roc.list[[paste(model.i, test.weights)]] <-
+      data.frame(model.info, test.weights, roc,
+                 row.names=NULL)
+  }#for(test.weights
+}#for(model.i
 
 test.error <- list(
   error=do.call(rbind, error.list),

@@ -1,3 +1,6 @@
+NOTE: Get works_with_R from
+https://github.com/tdhock/dotfiles/blob/master/.Rprofile
+
 ** TODOs
 
 - clinical data for other 14 diseases. setup cross-validation
@@ -9,7 +12,7 @@
 - nonlinear models like SVM, KNN, ctree, cforest.
 - augmented feature space (age, SNPs)
 - unscaled model so we can interpret weights.
-
+** 
 ** 18 Mar 2016
 
 Meeting with Steve, explained L1-regularized logistic regression
