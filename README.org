@@ -1,8 +1,17 @@
 ** TODOs
 
+- survival prediction (coxnet or AFT?)
 - nonlinear models like SVM, KNN, ctree, cforest.
 - augmented feature space (age, SNPs)
 - unscaled model so we can interpret weights.
+
+** 18 Mar 2016
+
+[[file:figure-glmnet.R]] produces a plot which shows glmnet model
+selection curves: binomial deviance on the validation set, and AUC on
+the train/test sets.
+
+[[file:figure-glmnet-train.png]]
 
 ** 14 Mar 2016
 
