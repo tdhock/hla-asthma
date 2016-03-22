@@ -1,6 +1,7 @@
+library(glmnet)
+
 models <- list(
   glmnet.weight1=function(train.feature.mat, train.label.vec, test.feature.mat){
-    require(glmnet)
     label.counts <- table(train.label.vec)
     weight.vec <- rep(1, length(train.label.vec))
     fit <- cv.glmnet(train.feature.mat, train.label.vec, weight.vec,
@@ -13,7 +14,6 @@ models <- list(
          fit=fit)
   }, glmnet.weightBalanced=function(
        train.feature.mat, train.label.vec, test.feature.mat){
-    require(glmnet)
     label.counts <- table(train.label.vec)
     weight.vec <- 1/label.counts[paste(train.label.vec)]
     fit <- cv.glmnet(train.feature.mat, train.label.vec, weight.vec,

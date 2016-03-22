@@ -1,4 +1,4 @@
-works_with_R("3.2.3", ggplot2="1.0.1")
+source("packages.R")
 
 load("test.error.RData")
 

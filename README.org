@@ -12,7 +12,13 @@ https://github.com/tdhock/dotfiles/blob/master/.Rprofile
 - nonlinear models like SVM, KNN, ctree, cforest.
 - augmented feature space (age, SNPs)
 - unscaled model so we can interpret weights.
-** 
+
+** 22 Mar 2016
+
+New [[file:input.features.R]] [[file:output.diseases.R]] and [[file:models.R]]
+which can be used to define different input feature representations,
+different output diseases, and different predictive models. 
+
 ** 18 Mar 2016
 
 Meeting with Steve, explained L1-regularized logistic regression

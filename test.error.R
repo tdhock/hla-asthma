@@ -1,6 +1,4 @@
-works_with_R("3.2.3",
-             "tdhock/WeightedROC@3452d61638e16f547f73c1a0f3bf852a3751f29d")
-
+source("packages.R")
 load("fold.RData")
 load("input.features.RData")
 load("output.diseases.RData")
@@ -20,7 +18,7 @@ for(model.i in 1:nrow(model.grid)){
   arg.vec <- sapply(model.info, paste)
   out.file <- paste0(paste(c("models", arg.vec), collapse="/"), ".RData")
   if(!file.exists(out.file)){
-    cmd <- paste(c("Rscript one.model.R", arg.vec), collapse=" ")
+    cmd <- paste(c("R --no-save --args", arg.vec, "< one.model.R"), collapse=" ")
     system(cmd)
   }
   load(out.file)

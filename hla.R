@@ -1,6 +1,4 @@
-works_with_R("3.2.3",
-             data.table="1.9.7",
-             "tdhock/namedCapture@05175927a45c301a18e8c6ebae67ea39a842d264")
+source("packages.R")
 
 asthma.pattern <- paste0(
   "(?<name>",

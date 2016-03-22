@@ -1,6 +1,10 @@
-arg.vec <- c("2", "hla", "asthma", "glmnet.weightBalanced")
+works_with_R("3.2.3",
+             glmnet="1.9.5")
+
+arg.vec <- c("1", "hla", "asthma", "glmnet.weight1")
 arg.vec <- commandArgs(trailingOnly=TRUE)
 stopifnot(length(arg.vec)==4)
+print(arg.vec)
 
 load("fold.RData")
 load("input.features.RData")
