@@ -1,93 +1,15 @@
 source("packages.R")
 load("glmnet.list.RData")
-load("fold.RData")
-load("hla.RData")
 
-variable.pattern <- paste0(
-  "(?<gene>[^ ]+)",
-  " ",
-  "(?<precision>2|4)",
-  " ",
-  "(?<allele>.*)")
-selected.by.fold <- list()
-auc.by.fold <- list()
-cv.by.fold <- list()
-vline.by.fold <- list()
-for(test.fold in 1:n.folds){
-  glmnet.by.weight <- glmnet.list[[test.fold]]
-  if(is.null(names(glmnet.by.weight))){
-    names(glmnet.by.weight) <- c("one", "balanced")
-  }
-  ## Compute train and test auc as a function of lambda.
-  print(test.fold)
-  fit <- glmnet.by.weight$balanced$fit
-  is.test <- fold == test.fold
-  sets <- list(
-    test=is.test,
-    train=!is.test)
-  auc.list <- list()
-  for(set in names(sets)){
-    is.set <- sets[[set]]
-    set.features <- hla$feature.mat[is.set,]
-    set.labels <- hla$clinical[is.set, "status"]
-    set.pred.mat <- predict(fit$glmnet.fit, set.features)
-    for(lambda.i in seq_along(fit$glmnet.fit$lambda)){
-      lambda <- fit$glmnet.fit$lambda[[lambda.i]]
-      set.pred.vec <- set.pred.mat[, lambda.i]
-      roc <- WeightedROC(set.pred.vec, set.labels)
-      auc <- WeightedAUC(roc)
-      auc.list[[paste(set, lambda.i)]] <- data.table(
-        set, lambda, auc)
-    }
-  }
-  auc.dt <- do.call(rbind, auc.list)
-  auc.by.fold[[test.fold]] <- data.table(
-    test.fold, auc.dt)
-  cv.err <- with(fit, data.table(lambda, cvm, cvsd, cvup, cvlo, nzero))
-  cv.by.fold[[test.fold]] <- data.table(
-    test.fold, cv.err)
-  vline.dt <- with(fit, data.table(lambda.1se))
-  vline.by.fold[[test.fold]] <- data.table(
-    test.fold, vline.dt)
-  with.legend <- ggplot()+
-    theme_bw()+
-    theme(panel.margin=grid::unit(0, "lines"))+
-    facet_grid(what ~ ., scales="free")+
-    geom_line(aes(-log(lambda), auc, color=set),
-              data=data.table(auc.dt, what="auc"))+
-    scale_x_continuous("model complexity -log(lambda)")+
-    ylab("")+
-    geom_vline(aes(xintercept=-log(lambda.1se)),
-               data=vline.dt)+
-    geom_ribbon(aes(-log(lambda), ymin=cvlo, ymax=cvup),
-                data=data.table(cv.err, what="binomial deviance"),
-                alpha=0.5)+
-    geom_line(aes(-log(lambda), cvm),
-              data=data.table(cv.err, what="binomial deviance"))+
-    geom_line(aes(-log(lambda), nzero),
-              data=data.table(cv.err, what="nzero"))
-  direct.label(with.legend, "last.qp")
-  coef.vec <- coef(fit)
-  is.zero <- as.logical(coef.vec == 0)
-  all.names <- rownames(coef.vec)[!is.zero]
-  variable <- all.names[all.names != "(Intercept)"]
-  meta.mat <- str_match_named(variable, variable.pattern)
-  selected.by.fold[[test.fold]] <- data.table(
-    test.fold, variable, meta.mat, weight=coef.vec[variable,])
-}#for(test.fold
-selected <- do.call(rbind, selected.by.fold)
-variable.counts <- selected[, list(folds=.N), by=variable]
+variable.counts <- glmnet.list$selected[, list(folds=.N), by=variable]
 setkey(variable.counts, variable)
 sorted.counts <- variable.counts[order(folds, variable),]
-setkey(selected, variable)
-show.points <- selected[variable.counts]
+setkey(glmnet.list$selected, variable)
+show.points <- glmnet.list$selected[variable.counts]
 show.points[, variable.importance := factor(variable, sorted.counts$variable)]
-show.auc <- do.call(rbind, auc.by.fold)
-show.cv <- do.call(rbind, cv.by.fold)
-show.vline <- do.call(rbind, vline.by.fold)
-setkey(show.vline, test.fold, lambda.1se)
-setkey(show.cv, test.fold, lambda)
-show.text <- show.cv[show.vline]
+setkey(glmnet.list$vline, test.fold, lambda.1se)
+setkey(glmnet.list$cv, test.fold, lambda)
+show.text <- glmnet.list$cv[glmnet.list$vline]
 
 set.colors <-
   c(validation="#4DAF4A",
@@ -113,16 +35,16 @@ with.legend <-
   scale_fill_manual(values=set.colors)+
   guides(fill="none")+
   geom_vline(aes(xintercept=-log(lambda.1se), color=set),
-             data=data.table(show.vline, set="validation"))+
+             data=data.table(glmnet.list$vline, set="validation"))+
   geom_ribbon(aes(-log(lambda), ymin=cvlo, ymax=cvup, fill=set),
               data=data.table(
-                show.cv, set="validation", what="binomial deviance"),
+                glmnet.list$cv, set="validation", what="binomial deviance"),
               alpha=0.5)+
   geom_line(aes(-log(lambda), cvm, color=set),
             data=data.table(
-              show.cv, set="validation", what="binomial deviance"))+
+              glmnet.list$cv, set="validation", what="binomial deviance"))+
   geom_line(aes(-log(lambda), nzero),
-            data=data.table(show.cv, what="nzero"))+
+            data=data.table(glmnet.list$cv, what="nzero"))+
   geom_text(aes(-log(lambda), nzero,
                 label=sprintf(" %d features", nzero)),
             vjust=1,
@@ -130,7 +52,7 @@ with.legend <-
             size=4,
             data=data.table(show.text, what="nzero"))+
   geom_line(aes(-log(lambda), auc, color=set),
-            data=data.table(show.auc, what="auc"))+
+            data=data.table(glmnet.list$auc, what="auc"))+
   scale_x_continuous("model complexity -log(lambda)")+
   ylab("")
 png("figure-glmnet-train.png", width=1100)
@@ -144,7 +66,7 @@ gene.colors <-
     "#A65628",#brown
     "#F781BF",#pink
     "#999999")#grey
-names(gene.colors) <- unique(selected$gene)
+names(gene.colors) <- unique(glmnet.list$selected$gene)
 
 gg.dots <- ggplot()+
   theme_bw()+
