@@ -8,7 +8,7 @@ model.grid <-
   expand.grid(
     test.fold=1:n.folds,
     input.name=names(input.features),
-    output.name=names(output.diseases),
+    output.name=colnames(output.diseases),
     model.name=names(models))
 
 error.list <- list()

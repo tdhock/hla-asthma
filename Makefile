@@ -16,3 +16,6 @@ output.diseases.RData: output.diseases.R hla.RData
 	R --no-save < $<
 hla.RData: hla.R
 	R --no-save < $<
+all.autoimmune.RData: all.autoimmune.R
+	R --no-save < $<
+

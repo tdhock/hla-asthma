@@ -23,8 +23,8 @@ stopifnot(0 < nrow(all.input.mat))
 stopifnot(0 < ncol(all.input.mat))
 
 output.name <- arg.vec[3]
-all.output.vec <- output.diseases[[output.name]]
-stopifnot(is.factor(all.output.vec))
+all.output.vec <- output.diseases[, output.name]
+stopifnot(is.logical(all.output.vec))
 stopifnot(length(all.output.vec) == nrow(all.input.mat))
 
 model.name <- arg.vec[4]

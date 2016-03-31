@@ -3,15 +3,19 @@ https://github.com/tdhock/dotfiles/blob/master/.Rprofile
 
 ** TODOs
 
-- clinical data for other 14 diseases. setup cross-validation
-  experiment with folds that contain 10% of each disease?
-- multi-task learning code? Is it more or less accurate than the
-  disease-specific single-task learning model? Are the sets of
-  selected genes different?
+- glmnet type.multinomial="grouped" multi-task learning code? Is it
+  more or less accurate than the disease-specific single-task learning
+  model? Are the sets of selected genes different?
 - survival prediction (coxnet or AFT?)
 - nonlinear models like SVM, KNN, ctree, cforest.
 - augmented feature space (age, SNPs)
 - unscaled model so we can interpret weights.
+
+** 31 Mar 2016
+
+- read clinical data for many other diseases in
+  [[file:all.autoimmune.R]].
+- [[file:fold.R]] now uses simple random sampling.
 
 ** 22 Mar 2016
 
