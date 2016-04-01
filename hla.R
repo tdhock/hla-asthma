@@ -31,7 +31,7 @@ for(obj.name in rownames(not.na.mat)){
   for(allele in names(count.tab)){
     n.alleles <- rowSums(allele.mat==allele)
     feature.name <- obj.meta[, paste(gene, precision, allele)]
-    feature.list[[feature.name]] <- n.alleles
+    feature.list[[feature.name]] <- Matrix(n.alleles)
   }
   feature.name <- obj.meta[, paste(gene, precision, "PROB")]
   feature.list[[feature.name]] <- gene.dt$PROB
@@ -52,6 +52,7 @@ hla <- list(
   clinical=data.frame(clinical)
   )
 rownames(hla$feature.mat) <- id.vec
+colnames(hla$feature.mat) <- names(feature.list)
 str(hla)
 
 save(hla, file="hla.RData")

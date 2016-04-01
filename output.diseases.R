@@ -1,17 +1,20 @@
+source("packages.R")
+
 load("hla.RData")
 load("all.autoimmune.RData")
 
-clinical.dt <- data.table(hla$clinical)
-clinical.dt[, ID.str := paste(ID)]
-setkey(clinical.dt, ID.str)
-clinical.ordered <- clinical.dt[rownames(all.autoimmune$patient.status),]
+hla.dt <- data.table(hla$clinical)
+diseases.ordered <- all.autoimmune$ageAtOnset[paste(hla.dt$ID), ]
 
-autoimmune <- data.table(all.autoimmune$disease.info)[type=="autoimmune",][order(-cases),][1:10,]
-output.diseases <- all.autoimmune$patient.status[, autoimmune$name]
-clinical.ordered$new.asthma <- output.diseases[, "asthma"]
-clinical.ordered[, new.status := ifelse(new.asthma, "diseased", "healthy")]
-inconsistent <- clinical.ordered[new.status != status,]
+autoimmune <- data.table(all.autoimmune$disease.info)[order(-cases),]
+output.diseases <- diseases.ordered[, autoimmune$name]
+
+stopifnot(identical(rownames(output.diseases), paste(hla.dt$ID)))
+hla.dt$new.ageAtOnset <- output.diseases[, "asthma"]
+hla.dt[, new.status := ifelse(new.ageAtOnset==0, "healthy", "diseased")]
+(inconsistent <- hla.dt[new.status != status,])
+with(hla.dt, table(status, new.status))
+with(hla.dt, table(Aff, new.status))
 stopifnot(nrow(inconsistent)==0)
-with(clinical.ordered, table(status, new.status))
 
 save(output.diseases, file="output.diseases.RData")

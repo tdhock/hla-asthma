@@ -1,3 +1,5 @@
+source("packages.R")
+
 load("output.diseases.RData")
 
 set.seed(1)
@@ -11,7 +13,7 @@ n.folds <- 10
 ##   fold[is.status] <- sample(rep(1:n.folds, l=n.status))
 ## }
 
-fold <- sample(rep(1:n.folds, l=nrow(hla$clinical)))
+fold <- sample(rep(1:n.folds, l=nrow(output.diseases)))
 
 for(disease in colnames(output.diseases)){
   has.disease <- output.diseases[, disease]

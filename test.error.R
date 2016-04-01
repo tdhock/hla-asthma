@@ -23,13 +23,13 @@ for(model.i in 1:nrow(model.grid)){
   }
   load(out.file)
   prob.diseased <- as.numeric(result.list$probability)
-  pred.label <- ifelse(0.5 < prob.diseased, "diseased", "healthy")
+  pred.label <- ifelse(0.5 < prob.diseased, TRUE, FALSE)
   is.test <- model.info$test.fold == fold
   all.input.mat <- input.features[[paste(model.info$input.name)]]
-  all.output.vec <- output.diseases[[paste(model.info$output.name)]]
+  all.output.vec <- output.diseases[, paste(model.info$output.name)]
   test.output.vec <- all.output.vec[is.test]
   is.error <- pred.label != test.output.vec
-  test.label <- ifelse(test.output.vec=="diseased", 1, -1)
+  test.label <- ifelse(test.output.vec, 1, -1)
   label.counts <- table(test.output.vec)
   weight.list <- list(
     one=rep(1, length(test.output.vec)),

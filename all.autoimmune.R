@@ -1,9 +1,19 @@
-works_with_R("3.2.3", data.table="1.9.7")
+source("packages.R")
 
-library(Matrix)
+##big.dt <- fread("all_autoimmune.txt", header=TRUE)
+corrected.dt <- fread("all_autoimmune_pheno_age.tab", header=TRUE)
 
-big.dt <- fread("all_autoimmune.txt", header=TRUE)
-disease.id.vec <- names(big.dt)[-c(1:3)]
+pattern <- paste0(
+  "^(?<colname>",
+  "_",
+  "(?<diseaseID>[0-9]+)",
+  "(?<suffix>_age)?",
+  ")")
+match.df <- str_match_named(
+  names(corrected.dt), pattern, list(diseaseID=as.integer))
+match.df$variable <- ifelse(match.df$suffix=="_age", "ageAtOnset", "diseased")
+meta.by.disease <- split(match.df, match.df$diseaseID)
+disease.id.vec <- names(meta.by.disease)
 
 relevant.dt <- fread("Autoimmune_diseases_codes_relevant.csv")
 only.relevant <- relevant.dt[autoimmun_code==1 & !grepl("N/A", `decoded pheno code`),]
@@ -13,29 +23,47 @@ codes.dt[, code.str := paste(code)]
 setkey(codes.dt, code.str)
 disease.meta <- codes.dt[disease.id.vec, ]
 keep.diseases <- disease.meta[!is.na(code),]
-stopifnot(only.relevant[["pheno_code or combinations of pheno codes"]] %in% keep.diseases$code)
+##stopifnot(only.relevant[["pheno_code or combinations of pheno codes"]] %in% keep.diseases$code)
 keep.diseases$type <- ifelse(
   keep.diseases$code %in%
   only.relevant[["pheno_code or combinations of pheno codes"]],
   "autoimmune", "other")
 keep.diseases[, table(type)]
+stopifnot(sum(!is.na(keep.diseases$name)) == length(disease.id.vec))
 
-disease.dt <- big.dt[, keep.diseases$code.str, with=FALSE]
-disease.mat <- Matrix(as.logical(0), nrow(disease.dt), ncol(disease.dt))
-dimnames(disease.mat) <- list(
-  ID=big.dt$IID,
-  disease=keep.diseases$name)
+##disease.dt <- big.dt[, keep.diseases$code.str, with=FALSE]
+disease.mat <- Matrix(
+  as.numeric(0), nrow(corrected.dt), nrow(keep.diseases),
+  dimnames=list(
+    ID=paste(corrected.dt$eid),
+    disease=keep.diseases$name)
+  )
 
 for(disease.i in 1:nrow(keep.diseases)){
   disease.row <- keep.diseases[disease.i,]
-  int.vec <- disease.dt[[disease.row$code.str]]
-  disease.mat[, disease.row$name] <- ifelse(int.vec==1, TRUE, FALSE)
+  cat(sprintf("%4d / %4d diseases %s\n", disease.i, nrow(keep.diseases), disease.row$name))
+  meta <- meta.by.disease[[disease.row$code.str]]
+  one.disease <- list()
+  for(variable.i in 1:nrow(meta)){
+    meta.row <- meta[variable.i, ]
+    one.disease[[paste(meta.row$variable)]] <-
+      corrected.dt[[paste(meta.row$colname)]]
+  }
+  with(one.disease, stopifnot(identical(is.na(ageAtOnset), diseased==1)))
+  disease.mat[, disease.row$name] <- ifelse(
+    is.na(one.disease$ageAtOnset), 0, one.disease$ageAtOnset)
 }
 
-colSums(disease.mat)
+## Compute the proportion of matrix entries that we actually need to
+## store.
+is.healthy <- disease.mat==0
+sum(is.healthy)/prod(dim(disease.mat))
+
+colSums(!is.healthy)
 
 all.autoimmune <- list(
   disease.info=data.frame(keep.diseases),
-  patient.status=disease.mat)
+  ageAtOnset=disease.mat)
+str(all.autoimmune)
 
 save(all.autoimmune, file="all.autoimmune.RData")
