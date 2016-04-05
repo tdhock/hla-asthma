@@ -11,6 +11,13 @@ https://github.com/tdhock/dotfiles/blob/master/.Rprofile
 - augmented feature space (age, SNPs)
 - unscaled model so we can interpret weights.
 
+** 5 Apr 2016
+
+- problem with inconsistent asthma status solved, but what does it
+  mean to have a negative age at onset? I guess a value of 0 means
+  that the person was born with the disease, but what do ages of -1
+  and -3 mean?
+
 ** 31 Mar 2016
 
 - read clinical data for many other diseases in

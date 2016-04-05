@@ -44,6 +44,7 @@ for(obj.name in rownames(not.na.mat)){
 }
 
 clinical <- gene.dt[, .(ID, Aff, Age)]
+stopifnot(clinical$Aff %in% c(1, 2))
 clinical[, status := factor(Aff, 1:2, c("healthy", "diseased"))]
 table(clinical$Aff)
 
