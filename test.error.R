@@ -10,11 +10,10 @@ model.grid <-
     input.name=names(feature.sets),
     output.name=colnames(output.diseases$diseased),
     model.name=names(models))
-stop(1)
 
 error.list <- list()
 roc.list <- list()
-for(model.i in 1:nrow(model.grid)){
+foreach(model.i=1:nrow(model.grid)) %dopar% {
   model.info <- model.grid[model.i, ]
   arg.vec <- sapply(model.info, paste)
   out.file <- paste0(paste(c("models", arg.vec), collapse="/"), ".RData")
