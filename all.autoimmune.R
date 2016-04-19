@@ -63,8 +63,9 @@ for(disease.i in 1:nrow(keep.diseases)){
   with(one.disease, stopifnot(identical(is.na(ageAtOnset), diseased==1)))
   with(one.disease, stopifnot(identical(!is.na(ageAtOnset), diseased==2)))
   negative.dt <- do.call(data.table, one.disease)[ageAtOnset < 0, ]
+  ## negative ageAtOnset means we know they have the disease but we
+  ## don't know when they got it.
   with(negative.dt, table(diseased, ageAtOnset))
-  stopifnot(nrow(negative.dt) == 0)
   ## (n.zero <- sum(one.disease$ageAtOnset==0, na.rm=TRUE))
   ## stopifnot(n.zero == 0)
   diseased.mat[, disease.row$name] <- one.disease$diseased == 2

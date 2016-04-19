@@ -17,11 +17,17 @@ with(hla.dt, table(Aff, new.status))
 stopifnot(nrow(inconsistent.status)==0)
 hla.dt[Age==0,]
 classify <- function(x){
-  ifelse(is.na(x), "missing",
+  ## Audrey says that when age < 0, we know that the person has
+  ## asthma, but we do not know when that person got it.
+  ifelse(is.na(x) | x < 0, "missing",
          ifelse(x==0, "zero", "non-zero"))
 }
 hla.dt[, table(old=classify(Age), new=classify(new.ageAtOnset))]
 (inconsistent.age <- hla.dt[classify(Age)!=classify(new.ageAtOnset),])
 stopifnot(nrow(inconsistent.age) == 0)
+
+output.diseases <- list(
+  diseased=diseased.ordered,
+  ageAtOnset=ageAtOnset.ordered)
 
 save(output.diseases, file="output.diseases.RData")

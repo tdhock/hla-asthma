@@ -3,9 +3,11 @@ https://github.com/tdhock/dotfiles/blob/master/.Rprofile
 
 ** TODOs
 
-- glmnet type.multinomial="grouped" multi-task learning code? Is it
-  more or less accurate than the disease-specific single-task learning
-  model? Are the sets of selected genes different?
+- multi-task learning code? Is it more or less accurate than the
+  disease-specific single-task learning model? Are the sets of
+  selected genes different?
+  - glmnet type.multinomial="grouped" 
+  - Julien's spams code apparently does this.
 - survival prediction (coxnet or AFT?)
 - nonlinear models like SVM, KNN, ctree, cforest.
 - augmented feature space (age, SNPs)

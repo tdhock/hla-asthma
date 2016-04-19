@@ -3,7 +3,7 @@ source("packages.R")
 load("output.diseases.RData")
 
 set.seed(1)
-n.folds <- 10
+n.folds <- 4
 
 ## stratified random sampling for the test sets.
 ## fold <- rep(NA, nrow(hla$clinical))

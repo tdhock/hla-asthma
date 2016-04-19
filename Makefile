@@ -6,13 +6,13 @@ figure-test-error.png: figure-test-error.R test.error.RData
 	R --no-save < $<
 test.error.RData: test.error.R input.features.RData output.diseases.RData models.RData
 	R --no-save < $<
-fold.RData: fold.R hla.RData
+fold.RData: fold.R hla.RData output.diseases.RData
 	R --no-save < $<
 models.RData: models.R
 	R --no-save < $<
-input.features.RData: input.features.R hla.RData
+input.features.RData: input.features.R hla.RData output.diseases.RData
 	R --no-save < $<
-output.diseases.RData: output.diseases.R hla.RData
+output.diseases.RData: output.diseases.R hla.RData all.autoimmune.RData
 	R --no-save < $<
 hla.RData: hla.R
 	R --no-save < $<

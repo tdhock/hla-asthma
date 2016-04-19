@@ -1,7 +1,10 @@
-load("output.diseases.RData")
+(objs <- load("output.diseases.RData"))
 load("hla.RData")
 
-all.features <- hla$feature.mat
-  
+input.features <- hla$feature.mat[rownames(output.diseases),]
+stopifnot(all(!is.na(input.features)))
+input.features[1:4,1:4]
 
-save(input.features, file="input.features.RData")
+feature.sets <- list(hla=colnames(input.features))
+
+save(input.features, feature.sets, file="input.features.RData")

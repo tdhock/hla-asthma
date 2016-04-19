@@ -21,6 +21,15 @@ models <- list(
     prob.vec <- predict(fit, test.feature.mat, type="response")
     list(probability=prob.vec,
          fit=fit)
+  }, glmnet.weightBalanced.standardizeFALSE=function(
+       train.feature.mat, train.label.vec, test.feature.mat){
+    label.counts <- table(train.label.vec)
+    weight.vec <- 1/label.counts[paste(train.label.vec)]
+    fit <- cv.glmnet(train.feature.mat, train.label.vec, weight.vec,
+                     family="binomial", standardize=FALSE)
+    prob.vec <- predict(fit, test.feature.mat, type="response")
+    list(probability=prob.vec,
+         fit=fit)
   }, major.class=function(train.feature.mat, train.label.vec, test.feature.mat){
     label.counts <- table(train.label.vec)
     major.class <- names(label.counts)[which.max(label.counts)]

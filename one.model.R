@@ -2,6 +2,7 @@ works_with_R("3.2.3",
              glmnet="1.9.5")
 
 arg.vec <- c("1", "hla", "asthma", "glmnet.weight1")
+arg.vec <- c("1", "hla", "type 1 diabetes", "glmnet.weight1")
 arg.vec <- commandArgs(trailingOnly=TRUE)
 stopifnot(length(arg.vec)==4)
 print(arg.vec)
@@ -16,14 +17,14 @@ is.test <- test.fold == fold
 stopifnot(0 < sum(is.test))
 
 input.name <- arg.vec[2]
-all.input.mat <- input.features[[input.name]]
-stopifnot(is.matrix(all.input.mat))
-stopifnot(is.numeric(all.input.mat))
+input.col.vec <- feature.sets[[input.name]]
+all.input.mat <- input.features[, input.col.vec]
+stopifnot(inherits(all.input.mat, "Matrix"))
 stopifnot(0 < nrow(all.input.mat))
 stopifnot(0 < ncol(all.input.mat))
 
 output.name <- arg.vec[3]
-all.output.vec <- output.diseases[, output.name]
+all.output.vec <- output.diseases$diseased[, output.name]
 stopifnot(is.logical(all.output.vec))
 stopifnot(length(all.output.vec) == nrow(all.input.mat))
 

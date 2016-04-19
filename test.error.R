@@ -7,9 +7,10 @@ load("models.RData")
 model.grid <- 
   expand.grid(
     test.fold=1:n.folds,
-    input.name=names(input.features),
-    output.name=colnames(output.diseases),
+    input.name=names(feature.sets),
+    output.name=colnames(output.diseases$diseased),
     model.name=names(models))
+stop(1)
 
 error.list <- list()
 roc.list <- list()
@@ -18,15 +19,16 @@ for(model.i in 1:nrow(model.grid)){
   arg.vec <- sapply(model.info, paste)
   out.file <- paste0(paste(c("models", arg.vec), collapse="/"), ".RData")
   if(!file.exists(out.file)){
-    cmd <- paste(c("R --no-save --args", arg.vec, "< one.model.R"), collapse=" ")
+    cmd <- paste(c("R --no-save --args", shQuote(arg.vec), "< one.model.R"), collapse=" ")
     system(cmd)
   }
   load(out.file)
   prob.diseased <- as.numeric(result.list$probability)
   pred.label <- ifelse(0.5 < prob.diseased, TRUE, FALSE)
   is.test <- model.info$test.fold == fold
-  all.input.mat <- input.features[[paste(model.info$input.name)]]
-  all.output.vec <- output.diseases[, paste(model.info$output.name)]
+  input.col.vec <- feature.sets[[paste(model.info$input.name)]]
+  all.input.mat <- input.features[, input.col.vec]
+  all.output.vec <- output.diseases$diseased[, paste(model.info$output.name)]
   test.output.vec <- all.output.vec[is.test]
   is.error <- pred.label != test.output.vec
   test.label <- ifelse(test.output.vec, 1, -1)
