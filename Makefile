@@ -4,7 +4,7 @@ glmnet.list.RData: glmnet.list.R test.error.RData
 	R --no-save < $<
 figure-test-error.png: figure-test-error.R test.error.RData
 	R --no-save < $<
-test.error.RData: test.error.R input.features.RData output.diseases.RData models.RData
+test.error.RData: test.error.R input.features.RData output.diseases.RData models.RData fold.RData
 	R --no-save < $<
 fold.RData: fold.R hla.RData output.diseases.RData
 	R --no-save < $<

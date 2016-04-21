@@ -24,7 +24,7 @@ with.legend <-
   ggplot()+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
-  facet_grid(what ~ test.fold, scales="free", labeller=function(var, val){
+  facet_grid(what ~ test.fold + output.name, scales="free", labeller=function(var, val){
     if(var=="test.fold"){
       paste("test fold", val)
     }else{
@@ -71,7 +71,7 @@ names(gene.colors) <- unique(glmnet.list$selected$gene)
 gg.dots <- ggplot()+
   theme_bw()+
   theme(panel.margin=grid::unit(0, "lines"))+
-  facet_grid(folds ~ ., scales='free', space='free')+
+  facet_grid(folds ~ output.name, scales='free', space='free')+
   scale_color_manual(values=gene.colors)+
   geom_point(aes(weight, variable.importance, color=gene),
              shape=1,
