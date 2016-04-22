@@ -30,7 +30,9 @@ models <- list(
     prob.vec <- predict(fit, test.feature.mat, type="response")
     list(probability=prob.vec,
          fit=fit)
-  }, major.class=function(train.feature.mat, train.label.vec, test.feature.mat){
+  }, major.class=function(train.feature.mat, train.TF.vec, test.feature.mat){
+    stopifnot(is.logical(train.TF.vec))
+    train.label.vec <- ifelse(train.TF.vec, "diseased", "healthy")
     label.counts <- table(train.label.vec)
     major.class <- names(label.counts)[which.max(label.counts)]
     prob.vec <- c(healthy=0, diseased=1)

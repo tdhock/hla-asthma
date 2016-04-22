@@ -11,8 +11,12 @@ https://github.com/tdhock/dotfiles/blob/master/.Rprofile
 - survival prediction (coxnet or AFT?)
 - nonlinear models like SVM, KNN, ctree, cforest.
 - augmented feature space (age, SNPs)
-- unscaled model so we can interpret weights.
 
+** 22 Apr 2016
+
+- [[file:figure-test-error/index.html][Interactive data viz of test error]].
+- unscaled model so we can interpret weights.
+  
 ** 5 Apr 2016
 
 - problem with inconsistent asthma status solved, but what does it

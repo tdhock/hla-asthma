@@ -6,14 +6,15 @@ library(data.table)
 error.dt <- data.table(test.error$error)
 error.dt[, prop.weighted.error := weighted.error/total.weight]
 best.model.error <-
-  error.dt[test.weights=="balanced" & model.name=="glmnet.weightBalanced",]
+  error.dt[test.weights=="balanced" & model.name=="glmnet.weightBalanced.standardizeFALSE",]
 output.error <- best.model.error[, list(
   mean.auc=mean(auc),
+  min.auc=min(auc),
   sd.auc=sd(auc),
   mean.positive=mean(total.positive),
   sd.positive=sd(total.positive)
   ), by=.(output.name, model.name)]
-(output.sorted <- output.error[order(-mean.auc),])
+(output.sorted <- output.error[order(-min.auc),])
 error.dt[, output.fac := factor(output.name, output.sorted$output.name)]
 
 error.melted <- melt(
@@ -31,7 +32,7 @@ model.colors <-
     "#B2DF8A", #lite green
     "#33A02C", #dark green
     "#FB9A99", #pink
-    "#E31A1C", #red
+    glmnet.weightBalanced.standardizeFALSE="#E31A1C", #red
     "#FDBF6F", #lite orange
     "#FF7F00", #dark orange
     "#CAB2D6", #violet
@@ -48,7 +49,7 @@ select.output <- ggplot()+
   geom_vline(aes(xintercept=auc),
              data=random,
              color="grey")+
-  geom_point(aes(mean.auc, mean.positive, color=model.name,
+  geom_point(aes(min.auc, mean.positive, color=model.name,
                  clickSelects=output.name),
              size=5,
              fill=NA,
@@ -76,7 +77,7 @@ test.roc[, model.fac := factor(model.name, levs)]
 error.dt[, model.fac := factor(model.name, levs)]
 error.dt[, test.fold.fac := factor(paste("test fold", test.fold), paste("test fold", 1:10))]
 error.melted[, model.fac := factor(model.name, rev(levs))]
-roc.points <- error.dt[model.name=="glmnet.weightBalanced" & test.weights=="balanced",]
+roc.points <- error.dt[model.name=="glmnet.weightBalanced.standardizeFALSE" & test.weights=="balanced",]
 
 gg.roc <- ggplot()+
   coord_equal()+
@@ -102,24 +103,6 @@ gg.roc <- ggplot()+
              size=4,
              fill="white",
              data=roc.points)
-
-viz$error <- ggplot()+
-  ggtitle("select test fold")+
-  theme_bw()+
-  theme(panel.margin=grid::unit(0, "lines"))+
-  scale_color_manual(values=model.colors)+
-  guides(color="none")+
-  facet_grid(. ~ variable, scales="free")+
-  xlab("")+
-  geom_vline(aes(xintercept=auc),
-             data=random,
-             color="grey")+
-  geom_point(aes(value, model.fac, color=model.fac,
-                 clickSelects=test.fold,
-                 showSelected=output.name),
-             shape=1,
-             size=4,
-             data=error.melted[test.weights=="balanced",])
 
 viz$ROC <- gg.roc+
   ggtitle("ROC curves for selected test set")+
@@ -159,6 +142,25 @@ viz$ROC <- gg.roc+
             data=roc.points,
             hjust=1)
 
+viz$error <- ggplot()+
+  ggtitle("select test fold")+
+  theme_bw()+
+  theme(panel.margin=grid::unit(0, "lines"))+
+  theme_animint(width=800, height=200)+
+  scale_color_manual(values=model.colors)+
+  guides(color="none")+
+  facet_grid(. ~ variable, scales="free")+
+  xlab("")+
+  geom_vline(aes(xintercept=auc),
+             data=random,
+             color="grey")+
+  geom_point(aes(value, model.fac, color=model.fac,
+                 clickSelects=test.fold,
+                 showSelected=output.name),
+             shape=1,
+             size=4,
+             data=error.melted[test.weights=="balanced",])
+
 animint2dir(viz, "figure-test-error")
 
 png("figure-test-error-roc.png", h=800, w=3800)
@@ -196,6 +198,6 @@ gg.error <- ggplot()+
 pdf("figure-test-error.pdf", h=3, w=10)
 print(gg.error)
 dev.off()
-png("figure-test-error.png", w=800)
+png("figure-test-error.png", w=600, h=800)
 print(gg.error)
 dev.off()

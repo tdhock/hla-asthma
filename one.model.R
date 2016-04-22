@@ -3,6 +3,7 @@ works_with_R("3.2.3",
 
 arg.vec <- c("1", "hla", "asthma", "glmnet.weight1")
 arg.vec <- c("1", "hla", "type 1 diabetes", "glmnet.weight1")
+arg.vec <- c("1", "hla", "type 1 diabetes", "major.class")
 arg.vec <- commandArgs(trailingOnly=TRUE)
 stopifnot(length(arg.vec)==4)
 print(arg.vec)

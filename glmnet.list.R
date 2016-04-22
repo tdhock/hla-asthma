@@ -4,13 +4,13 @@ load("models.RData")
 load("input.features.RData")
 load("output.diseases.RData")
 
-model.grid <- 
+full.model.grid <- 
   expand.grid(
     test.fold=1:n.folds,
     input.name=names(feature.sets),
     output.name=colnames(output.diseases$diseased),
     model.name=names(models))
-model.grid <- subset(model.grid, model.name == "glmnet.weightBalanced")
+model.grid <- subset(full.model.grid, grepl("weightBalanced", model.name))
 
 variable.pattern <- paste0(
   "(?<gene>[^ ]+)",
@@ -19,15 +19,15 @@ variable.pattern <- paste0(
   " ",
   "(?<allele>.*)")
 
-model.results <- foreach(file.i=1:nrow(model.grid)) %dopar% {
-##model.results <- foreach(file.i=1:2) %dopar% {
+i.vec <- 1:nrow(model.grid)
+##i.vec <- with(model.grid, which(output.name %in% c("asthma", "type 2 diabetes") & test.fold==1))
+model.results <- foreach(file.i=i.vec) %dopar% {
   model.info <- model.grid[file.i, ]
   arg.vec <- sapply(model.info, paste)
   RData.file <- paste0(paste(c("models", arg.vec), collapse="/"), ".RData")
   objs <- load(RData.file)
   test.fold <- as.integer(model.info$test.fold)
   ## Compute train and test auc as a function of lambda.
-  input.name <- paste(model.info$input.name)
   output.name <- paste(model.info$output.name)
   cat(sprintf("%4d / %4d models\n", file.i, nrow(model.grid)))
   is.test <- fold == test.fold
@@ -53,16 +53,16 @@ model.results <- foreach(file.i=1:nrow(model.grid)) %dopar% {
     }
   }
   auc.dt <- do.call(rbind, auc.list)
-  auc.by.fold[[test.fold]] <- data.table(
-    input.name, output.name, test.fold, auc.dt)
+  ## auc.by.fold[[test.fold]] <- data.table(
+  ##   input.name, output.name, test.fold, auc.dt)
   cv.err <- with(result.list$fit, {
     data.table(lambda, cvm, cvsd, cvup, cvlo, nzero)
   })
-  cv.by.fold[[test.fold]] <- data.table(
-    input.name, output.name, test.fold, cv.err)
+  ## cv.by.fold[[test.fold]] <- data.table(
+  ##   input.name, output.name, test.fold, cv.err)
   vline.dt <- with(result.list$fit, data.table(lambda.1se))
-  vline.by.fold[[test.fold]] <- data.table(
-    input.name, output.name, test.fold, vline.dt)
+  ## vline.by.fold[[test.fold]] <- data.table(
+  ##   input.name, output.name, test.fold, vline.dt)
   with.legend <- ggplot()+
     theme_bw()+
     theme(panel.margin=grid::unit(0, "lines"))+
@@ -85,19 +85,24 @@ model.results <- foreach(file.i=1:nrow(model.grid)) %dopar% {
   is.zero <- as.logical(coef.vec == 0)
   all.names <- rownames(coef.vec)[!is.zero]
   variable <- all.names[all.names != "(Intercept)"]
-  meta.mat <- str_match_named(variable, variable.pattern)
-  selected.by.fold[[test.fold]] <- data.table(
-    input.name, output.name, test.fold,
-    variable, meta.mat, weight=coef.vec[variable,])
-  list(selected=data.table(
-         input.name, output.name, test.fold,
-         variable, meta.mat, weight=coef.vec[variable,]),
-       auc=data.table(
-         input.name, output.name, test.fold, auc.dt),
-       cv=data.table(
-         input.name, output.name, test.fold, cv.err),
-       vline=data.table(
-         input.name, output.name, test.fold, vline.dt))
+  one.result <- list(
+    auc=data.table(
+      model.info,
+      auc.dt),
+    cv=data.table(
+      model.info,
+      cv.err),
+    vline=data.table(
+      model.info,
+      vline.dt))
+  if(0 < length(variable)){
+    meta.mat <- str_match_named(variable, variable.pattern)
+    ##selected.by.fold[[test.fold]] <-
+    one.result$selected <- data.table(
+      model.info,
+      variable, meta.mat, weight=coef.vec[variable,])
+  }
+  one.result
 }#for(test.fold
 
 glmnet.list <- list()

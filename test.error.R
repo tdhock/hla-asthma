@@ -20,7 +20,13 @@ result.list <- foreach(model.i=1:nrow(model.grid)) %dopar% {
   out.file <- paste0(paste(c("models", arg.vec), collapse="/"), ".RData")
   if(!file.exists(out.file)){
     cmd <- paste(c("R --no-save --args", shQuote(arg.vec), "< one.model.R"), collapse=" ")
-    system(cmd)
+    status <- system(cmd)
+    if(status != 0){
+      stop(status, " error in model fitting R program")
+    }
+  }else{
+    cat("already computed model\n")
+    print(model.info)
   }
   load(out.file)
   prob.diseased <- as.numeric(result.list$probability)
