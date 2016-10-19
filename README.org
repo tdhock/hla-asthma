@@ -12,6 +12,14 @@ https://github.com/tdhock/dotfiles/blob/master/.Rprofile
 - nonlinear models like SVM, KNN, ctree, cforest.
 - augmented feature space (age, SNPs)
 
+** 19 Oct 2016
+
+[[file:markers.dosages.R]] reads 32 marker input features.
+
+[[file:figure-asthma.R]] creates [[file:figure-asthma/index.html]] which shows
+that the test accuracy (AUC) increases when the input features for the
+new 32 markers are used.
+
 ** 22 Apr 2016
 
 - [[file:figure-test-error/index.html][Interactive data viz of test error]].

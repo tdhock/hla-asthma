@@ -10,7 +10,7 @@ fold.RData: fold.R hla.RData output.diseases.RData
 	R --no-save < $<
 models.RData: models.R
 	R --no-save < $<
-input.features.RData: input.features.R hla.RData output.diseases.RData
+input.features.RData: input.features.R hla.RData output.diseases.RData markers.dosages.RData
 	R --no-save < $<
 output.diseases.RData: output.diseases.R hla.RData all.autoimmune.RData
 	R --no-save < $<
@@ -18,4 +18,5 @@ hla.RData: hla.R
 	R --no-save < $<
 all.autoimmune.RData: all.autoimmune.R
 	R --no-save < $<
-
+markers.dosages.RData: markers.dosages.R
+	R --no-save < $<

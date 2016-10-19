@@ -10,7 +10,12 @@ full.model.grid <-
     input.name=names(feature.sets),
     output.name=colnames(output.diseases$diseased),
     model.name=names(models))
-model.grid <- subset(full.model.grid, grepl("weightBalanced", model.name))
+model.grid <- 
+  expand.grid(
+    test.fold=1:n.folds,
+    input.name=names(feature.sets),
+    output.name="asthma",
+    model.name="glmnet.weightBalanced.standardizeFALSE")
 
 variable.pattern <- paste0(
   "(?<gene>[^ ]+)",

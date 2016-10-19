@@ -10,6 +10,12 @@ model.grid <-
     input.name=names(feature.sets),
     output.name=colnames(output.diseases$diseased),
     model.name=names(models))
+model.grid <- 
+  expand.grid(
+    test.fold=1:n.folds,
+    input.name=names(feature.sets),
+    output.name="asthma",
+    model.name=names(models))
 ##model.grid <- subset(model.grid, model.name %in% paste0("glmnet.weight", c("Balanced", 1)))
 
 error.list <- list()
