@@ -3,10 +3,24 @@ source("packages.R")
 load("hla.RData")
 load("all.autoimmune.RData")
 
+asthma.ages <- fread("ages_toby.txt")
+setkey(asthma.ages, IID)
+
 hla.dt <- data.table(hla$clinical)
 ageAtOnset.ordered <- all.autoimmune$ageAtOnset[paste(hla.dt$ID), ]
 diseased.ordered <- all.autoimmune$diseased[paste(hla.dt$ID), ]
-
+asthmaAge.ordered <- asthma.ages[J(hla.dt$ID)]
+table(
+  diseased.ordered[, "asthma"],
+  asthmaAge.ordered$Age1)
+table(
+  diseased.ordered[, "asthma"],
+  asthmaAge.ordered$Age8)
+makeLogical <- function(num.vec){
+  ifelse(num.vec == -9, NA, num.vec == 1)
+}
+asthmaAge.mat <- Matrix(makeLogical(as.matrix(asthmaAge.ordered[, .(Age6, Age8)])))
+rownames(asthmaAge.mat) <- asthmaAge.ordered$IID
 hla.dt$new.asthma <- diseased.ordered[, "asthma"]
 hla.dt$new.ageAtOnset <- ifelse(
   diseased.ordered[, "asthma"], ageAtOnset.ordered[, "asthma"], NA)
@@ -27,7 +41,7 @@ hla.dt[, table(old=classify(Age), new=classify(new.ageAtOnset))]
 stopifnot(nrow(inconsistent.age) == 0)
 
 output.diseases <- list(
-  diseased=diseased.ordered,
+  diseased=cbind(diseased.ordered, asthmaAge.mat),
   ageAtOnset=ageAtOnset.ordered)
 
 save(output.diseases, file="output.diseases.RData")

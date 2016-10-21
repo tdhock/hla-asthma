@@ -2,9 +2,7 @@ source("packages.R")
 
 load("test.error.RData")
 load("glmnet.list.RData")
-
 load("input.features.RData")
-
 feature.sets$markers %in% glmnet.list$selected$variable
 
 variable.counts <- glmnet.list$selected[, list(
@@ -35,8 +33,11 @@ ggplot()+
   geom_path(aes(FPR, TPR, color=input.name), data=test.roc)
 
 ggplot()+
-  geom_point(aes(auc, input.name), data=test.dots)+
-  geom_line(aes(auc, input.name, group=test.fold), data=test.dots)
+  theme_bw()+
+  theme(panel.margin=grid::unit(0, "lines"))+
+  geom_point(aes(auc, input.name, color=model.name),
+             shape=1,
+             data=test.dots)
 
 ggplot()+
   theme_bw()+
@@ -64,8 +65,8 @@ viz <- list(
   selector.types=list(input.name="multiple"),
   roc=ggplot()+
     ggtitle("ROC curves for selected test fold")+
-    xlab("False Positive Rate")+
-    ylab("True Positive Rate")+
+    xlab("False Positive Rate = Prob(Asthma | Healthy)")+
+    ylab("True Positive Rate = Prob(Asthma | Asthma)")+
     theme_bw()+
     theme(panel.margin=grid::unit(0, "lines"))+
     coord_equal()+

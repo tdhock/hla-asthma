@@ -4,18 +4,18 @@ load("models.RData")
 load("input.features.RData")
 load("output.diseases.RData")
 
-full.model.grid <- 
-  expand.grid(
-    test.fold=1:n.folds,
-    input.name=names(feature.sets),
-    output.name=colnames(output.diseases$diseased),
-    model.name=names(models))
+some.diseases <- c(
+  "asthma",
+  "Age6",
+  "Age8",
+  "hayfever/allergic rhinitis",
+  "eczema/dermatitis")
 model.grid <- 
   expand.grid(
     test.fold=1:n.folds,
-    input.name=names(feature.sets),
-    output.name="asthma",
-    model.name=grep("glmnet", names(models), value=TRUE))
+    input.name="hla.markers.sex",
+    output.name=some.diseases,
+    model.name="glmnet.weightBalanced.standardizeFALSE")
 
 variable.pattern <- paste0(
   "(?<gene>[^ ]+)",

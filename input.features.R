@@ -3,6 +3,8 @@ source("packages.R")
 (objs <- load("output.diseases.RData"))
 load("hla.RData")
 load("markers.dosages.RData")
+marker.positions <- fread("marker_positions.tsv")
+marker.positions[, discovery := ifelse(is.na(oldMissingNew1), "old", "new")]
 
 not.markers <- c("FID", "IID", "SEX")
 is.marker <- ! names(markers.dosages) %in% not.markers
@@ -25,6 +27,9 @@ feature.sets <- list(
   )
 feature.sets$hla.markers <- with(feature.sets, c(hla, markers))
 feature.sets$hla.markers.sex <- with(feature.sets, c("sex1", hla, markers))
+feature.sets$hla.oldMarkers.sex <- c(
+  marker.positions[discovery=="old", marker],
+  "sex1", feature.sets$hla)
 
 ## feature.sets$hlaNoProb <-
 ##   grep("PROB", colnames(input.features), invert=TRUE, value=TRUE))

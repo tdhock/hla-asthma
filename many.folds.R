@@ -1,21 +1,30 @@
 source("packages.R")
-load("fold.RData")
-load("models.RData")
+
 load("input.features.RData")
 load("output.diseases.RData")
+load("models.RData")
 
-full.model.grid <- 
-  expand.grid(
-    test.fold=1:n.folds,
-    input.name=names(feature.sets),
-    output.name=colnames(output.diseases$diseased),
-    model.name=names(models))
-model.grid <- 
-  expand.grid(
-    test.fold=1:n.folds,
-    input.name=names(feature.sets),
-    output.name="asthma",
-    model.name=grep("glmnet", names(models), value=TRUE))
+n.folds <- 100
+label.vec <- output.diseases$diseased[, "asthma"]
+set.seed(1)
+fold.vec <- sample(rep(1:n.folds, l=length(label.vec)))
+test.fold <- 1
+
+foreach(test.fold=1:n.folds) %dopar% {
+  is.test <- fold.vec == test.fold
+  is.train <- !is.test
+  result.list.RData <- file.path("many.folds", test.fold, "result.list.RData")
+  if(!file.exists(result.list.RData)){
+    cat(sprintf("%4d / %4d %s\n", test.fold, n.folds, result.list.RData))
+    result.list <- models$glmnet.weightBalanced.standardizeFALSE(
+      input.features[is.train,],
+      label.vec[is.train],
+      input.features[is.test,])
+    fold.dir <- dirname(result.list.RData)
+    dir.create(fold.dir, showWarnings=FALSE, recursive=TRUE)
+    save(result.list, file=result.list.RData)
+  }
+}
 
 variable.pattern <- paste0(
   "(?<gene>[^ ]+)",
@@ -24,29 +33,20 @@ variable.pattern <- paste0(
   " ",
   "(?<allele>.*)")
 
-i.vec <- 1:nrow(model.grid)
-##i.vec <- with(model.grid, which(output.name %in% c("asthma", "type 2 diabetes") & test.fold==1))
-model.results <- foreach(file.i=i.vec) %dopar% {
-  model.info <- model.grid[file.i, ]
-  arg.vec <- sapply(model.info, paste)
-  RData.file <- paste0(paste(c("models", arg.vec), collapse="/"), ".RData")
+model.results <- foreach(test.fold=1:n.folds) %dopar% {
+  RData.file <- file.path("many.folds", test.fold, "result.list.RData")
   objs <- load(RData.file)
-  test.fold <- as.integer(model.info$test.fold)
   ## Compute train and test auc as a function of lambda.
-  output.name <- paste(model.info$output.name)
-  cat(sprintf("%4d / %4d models\n", file.i, nrow(model.grid)))
-  is.test <- fold == test.fold
-  input.col.vec <- feature.sets[[paste(model.info$input.name)]]
-  all.features <- input.features[, input.col.vec]
-  all.labels <- output.diseases$diseased[, output.name]
+  cat(sprintf("%4d / %4d test folds\n", test.fold, n.folds))
+  is.test <- fold.vec == test.fold
   sets <- list(
     test=is.test,
     train=!is.test)
   auc.list <- list()
   for(set in names(sets)){
     is.set <- sets[[set]]
-    set.features <- all.features[is.set,]
-    set.labels <- ifelse(all.labels[is.set], 1, -1)
+    set.features <- input.features[is.set,]
+    set.labels <- ifelse(label.vec[is.set], 1, -1)
     set.pred.mat <- predict(result.list$fit$glmnet.fit, set.features)
     for(lambda.i in seq_along(result.list$fit$glmnet.fit$lambda)){
       lambda <- result.list$fit$glmnet.fit$lambda[[lambda.i]]
@@ -92,28 +92,28 @@ model.results <- foreach(file.i=i.vec) %dopar% {
   variable <- all.names[all.names != "(Intercept)"]
   one.result <- list(
     auc=data.table(
-      model.info,
+      test.fold,
       auc.dt),
     cv=data.table(
-      model.info,
+      test.fold,
       cv.err),
     vline=data.table(
-      model.info,
+      test.fold,
       vline.dt))
   if(0 < length(variable)){
     meta.mat <- str_match_named(variable, variable.pattern)
     ##selected.by.fold[[test.fold]] <-
     one.result$selected <- data.table(
-      model.info,
+      test.fold,
       variable, meta.mat, weight=coef.vec[variable,])
   }
   one.result
 }#for(test.fold
 
-glmnet.list <- list()
+many.folds <- list()
 for(data.type in names(model.results[[1]])){
-  glmnet.list[[data.type]] <-
+  many.folds[[data.type]] <-
     do.call(rbind, lapply(model.results, "[[", data.type))
 }
 
-save(glmnet.list, file="glmnet.list.RData")
+save(many.folds, file="many.folds.RData")

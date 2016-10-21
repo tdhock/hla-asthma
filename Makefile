@@ -20,3 +20,7 @@ all.autoimmune.RData: all.autoimmune.R
 	R --no-save < $<
 markers.dosages.RData: markers.dosages.R
 	R --no-save < $<
+many.folds.RData: many.folds.R
+	R --no-save < $<
+many.seeds.RData: many.seeds.R
+	R --no-save < $<

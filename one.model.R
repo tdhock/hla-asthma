@@ -1,7 +1,7 @@
 works_with_R("3.2.3",
              glmnet="1.9.5")
 
-arg.vec <- c("1", "hla", "asthma", "glmnet.weight1")
+arg.vec <- c("1", "hla", "Age6", "glmnet.weightBalanced.standardizeFALSE")
 arg.vec <- c("1", "hla", "type 1 diabetes", "glmnet.weight1")
 arg.vec <- c("1", "hla", "type 1 diabetes", "major.class")
 arg.vec <- commandArgs(trailingOnly=TRUE)
@@ -37,8 +37,9 @@ is.train <- !is.test
 train.input.mat <- all.input.mat[is.train,]
 train.output.vec <- all.output.vec[is.train]
 test.input.mat <- all.input.mat[is.test,]
+keep <- !is.na(train.output.vec)
 result.list <-
-  model.fun(train.input.mat, train.output.vec, test.input.mat)
+  model.fun(train.input.mat[keep,], train.output.vec[keep], test.input.mat)
 
 out.file <- paste0(paste(c("models", arg.vec), collapse="/"), ".RData")
 out.dir <- dirname(out.file)

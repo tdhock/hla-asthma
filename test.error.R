@@ -3,7 +3,9 @@ load("fold.RData")
 load("input.features.RData")
 load("output.diseases.RData")
 load("models.RData")
-
+some.diseases <- c(
+  "hayfever/allergic rhinitis",
+  "eczema/dermatitis")
 model.grid <- 
   expand.grid(
     test.fold=1:n.folds,
@@ -15,7 +17,7 @@ model.grid <-
     test.fold=1:n.folds,
     input.name=names(feature.sets),
     output.name="asthma",
-    model.name=names(models))
+    model.name="glmnet.weightBalanced.standardizeFALSE")
 ##model.grid <- subset(model.grid, model.name %in% paste0("glmnet.weight", c("Balanced", 1)))
 
 error.list <- list()
